@@ -250,6 +250,8 @@ class GoRouterDelegate extends RouterDelegate<Uri>
     _matches
       ..clear()
       ..addAll(matches);
+    // reset all push counts since all pushed pages are removed.
+    _pushCounts.clear();
   }
 
   void _push(String location, {Object? extra}) {
@@ -276,6 +278,27 @@ class GoRouterDelegate extends RouterDelegate<Uri>
     // add a new match onto the stack of matches
     assert(matches.isNotEmpty);
     _matches.add(match);
+  }
+
+  /// Replaces the top page in the stack by the given location
+  void pushReplacement(String location, {Object? extra}) {
+    log.info('replacing top page with $location');
+    _pushReplacement(location, extra: extra);
+    notifyListeners();
+  }
+
+  void _pushReplacement(String location, {Object? extra}) {
+    assert(matches.isNotEmpty);
+    // decrement the push count for the replaced (top) page.
+    // this is necessary mainly for nested navigation since 
+    // the new page has to have the same key as the replaced one
+    // in order to maintain the same widget tree. 
+    final topPageFullpath = matches.last.fullpath;
+    if (_pushCounts[topPageFullpath] != null) {
+      _pushCounts[topPageFullpath] = _pushCounts[topPageFullpath]! - 1;
+    }
+    _matches.removeLast();
+    _push(location, extra: extra);
   }
 
   List<GoRouteMatch> _getLocRouteMatchesWithRedirects(

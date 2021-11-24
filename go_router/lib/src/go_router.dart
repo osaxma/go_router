@@ -153,4 +153,20 @@ class GoRouter extends ChangeNotifier with NavigatorObserver {
   @override
   void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) =>
       notifyListeners();
+
+  /// Replaces the top page in the stack by the given URI location.
+  void pushReplacement(String location, {Object? extra}) => 
+      routerDelegate.pushReplacement(location, extra: extra);
+
+  /// Replaces the top page in the stack by the given named route.
+  void pushReplacementNamed(
+    String name, {
+    Map<String, String> params = const {},
+    Map<String, String> queryParams = const {},
+    Object? extra,
+  }) =>
+      routerDelegate.pushReplacement(
+        namedLocation(name, params: params, queryParams: queryParams),
+        extra: extra,
+      );
 }
